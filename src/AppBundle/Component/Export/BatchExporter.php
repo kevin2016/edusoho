@@ -122,7 +122,7 @@ class BatchExporter
 
     protected function exportCsv($name, $fileName, $customFileName)
     {
-        $exportPath = $this->exportFileRootPath().$fileName;
+        $exportPath = $this->exportFileRootPath().basename($fileName);
 
         return [$exportPath, $this->transTitle($fileName, $customFileName)];
     }
@@ -135,7 +135,7 @@ class BatchExporter
 
         if (true === $zip->open($zipPath, ZipArchive::CREATE)) {
             foreach ($fileNames as $value) {
-                $path = $this->exportFileRootPath().$value;
+                $path = $this->exportFileRootPath().basename($value);
                 if (file_exists($path)) {
                     $zip->addFile($path, $this->transTitle($value, $customFileName));
                 }
@@ -147,7 +147,7 @@ class BatchExporter
         $zip->close();
 
         foreach ($fileNames as $value) {
-            $path = $this->exportFileRootPath().$value;
+            $path = $this->exportFileRootPath().basename($value);
             if (file_exists($path)) {
                 FileToolkit::remove($path);
             }
@@ -170,6 +170,9 @@ class BatchExporter
 
     protected function writeCsv($fileName, $csvName)
     {
+        if (empty($fileName)) {
+            throw new UnexpectedValueException('exporter filename could not be found');
+        }
         $filePath = $this->exportFileRootPath().$fileName;
         $csvPath = $this->exportFileRootPath().$csvName;
         $contentRows = $this->getContentRows($filePath);

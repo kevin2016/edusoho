@@ -26,6 +26,7 @@ imports:
         resource: theme_jianmo_parameters.yml
     -
         resource: '@CustomBundle/Resources/config/services.yml'
+    - { resource: "@MarketingMallBundle/Resources/config/services.yml" }
 framework:
     translator:
         fallback: '%locale%'
@@ -46,7 +47,8 @@ framework:
     session:
         handler_id: '%session.service_id%'
         cookie_domain: '%cookie_domain%'
-    fragments: null
+    fragments:
+        enabled: false
     http_method_override: true
     assets:
         version: '%app_version%'

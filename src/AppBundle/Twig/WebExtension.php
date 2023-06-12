@@ -20,11 +20,10 @@ use AppBundle\Util\CategoryBuilder;
 use AppBundle\Util\CdnUrl;
 use AppBundle\Util\UploadToken;
 use Biz\Account\Service\AccountProxyService;
-use Biz\AuditCenter\Service\ReportAuditService;
 use Biz\AuditCenter\Service\ReportRecordService;
 use Biz\AuditCenter\Service\ReportService;
 use Biz\Classroom\Service\ClassroomService;
-use Biz\CloudPlatform\CloudAPIFactory;
+use Biz\CloudPlatform\Service\EduCloudService;
 use Biz\CloudPlatform\Service\ResourceFacadeService;
 use Biz\Content\Service\BlockService;
 use Biz\Course\Service\CourseService;
@@ -38,7 +37,6 @@ use Biz\Player\Service\PlayerService;
 use Biz\Product\Service\ProductService;
 use Biz\S2B2C\Service\FileSourceService;
 use Biz\S2B2C\Service\S2B2CFacadeService;
-use Biz\System\Service\CacheService;
 use Biz\System\Service\SettingService;
 use Biz\Testpaper\Service\TestpaperService;
 use Biz\Theme\Service\ThemeService;
@@ -122,6 +120,7 @@ class WebExtension extends \Twig_Extension
             new \Twig_SimpleFilter('url_decode', [$this, 'urlDecode']),
             new \Twig_SimpleFilter('s2b2c_file_convert', [$this, 's2b2cFileConvert']),
             new \Twig_SimpleFilter('html_special_chars_decode', [$this, 'getHtmlSpecialCharsDecode']),
+            new \Twig_SimpleFilter('json_decode', [$this, 'jsonDecode']),
         ];
     }
 
@@ -236,9 +235,11 @@ class WebExtension extends \Twig_Extension
             new \Twig_SimpleFunction('is_group_member', [$this, 'isGroupMember']),
             new \Twig_SimpleFunction('is_reported', [$this, 'isReported']),
             new \Twig_SimpleFunction('is_assistant', [$this, 'isAssistant']),
-            new \Twig_SimpleFunction('is_saas', [$this, 'isSaas']),
+            new \Twig_SimpleFunction('is_show_feedback', [$this, 'isShowFeedback']),
+            new \Twig_SimpleFunction('is_show_mall', [$this, 'isShowMall']),
             new \Twig_SimpleFunction('is_teacher_role', [$this, 'isTeacherRole']),
             new \Twig_SimpleFunction('user_info_select', [$this, 'userInfoSelect']),
+            new \Twig_SimpleFunction('user_show_path', [$this, 'userPath']),
         ];
     }
 
@@ -264,22 +265,14 @@ class WebExtension extends \Twig_Extension
         return false;
     }
 
-    public function isSaas()
+    public function isShowFeedback()
     {
-        $level = $this->getCacheService()->get('site_level');
-        if (empty($level)) {
-            $api = CloudAPIFactory::create('root');
-            $info = $api->get('/me');
-            $level = $info['level'] ? $info['level'] : '';
-            $this->getCacheService()->set('site_level', $level, time() + 7200);
-        }
-
-        return in_array($this->getCacheService()->get('site_level'), $this->getSaasLevels());
+        return in_array($this->getEduCloudService()->getLevel(), ['license', 'basic', 'medium', 'advanced', 'gold', 'custom', 'es-basic', 'es-standard', 'es-professional', 'es-flagship']);
     }
 
-    public function getSaasLevels()
+    public function isShowMall()
     {
-        return ['license', 'basic', 'medium', 'advanced', 'gold', 'custom', 'es-basic', 'es-standard', 'es-professional', 'es-flagship'];
+        return $this->getMallService()->isShow();
     }
 
     public function isGroupMember($groupId)
@@ -328,14 +321,6 @@ class WebExtension extends \Twig_Extension
         return $this->createService('Group:GroupService');
     }
 
-    /**
-     * @return CacheService
-     */
-    protected function getCacheService()
-    {
-        return $this->createService('System:CacheService');
-    }
-
     public function isShowNewMembers()
     {
         $theme = $this->getSetting('theme.uri');
@@ -355,6 +340,14 @@ class WebExtension extends \Twig_Extension
                 return false;
             }
         }
+    }
+
+    public function userPath($params)
+    {
+        $id = $params['id']??0;
+        $user = $this->getUserService()->getUser($id);
+
+        return $this->container->get('router')->generate('user_show', ['id' => $user['uuid']??$id]);
     }
 
     /**
@@ -528,6 +521,13 @@ class WebExtension extends \Twig_Extension
     public function getHtmlSpecialCharsDecode($str)
     {
         return htmlspecialchars_decode($str);
+    }
+
+    public function jsonDecode($str)
+    {
+        $json = json_decode($str, true);
+
+        return is_array($json) ? $json : json_decode($json, true);
     }
 
     public function getDays($days)
@@ -2576,14 +2576,6 @@ class WebExtension extends \Twig_Extension
     }
 
     /**
-     * @return TestpaperService
-     */
-    protected function getTestPaperService()
-    {
-        return $this->createService('Testpaper:TestpaperService');
-    }
-
-    /**
      * @return SettingService
      */
     protected function getSettingService()
@@ -2640,10 +2632,15 @@ class WebExtension extends \Twig_Extension
     }
 
     /**
-     * @return ReportAuditService
+     * @return EduCloudService
      */
-    protected function getReportAuditService()
+    protected function getEduCloudService()
     {
-        return $this->createService('AuditCenter:ReportAuditService');
+        return $this->createService('CloudPlatform:EduCloudService');
+    }
+
+    protected function getMallService()
+    {
+        return $this->createService('Mall:MallService');
     }
 }

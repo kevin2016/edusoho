@@ -213,35 +213,26 @@ class ActivityServiceImpl extends BaseService implements ActivityService
         if ($this->invalidActivity($fields)) {
             $this->createNewException(CommonException::ERROR_PARAMETER());
         }
-
         $this->getCourseService()->tryManageCourse($fields['fromCourseId']);
         $activityConfig = $this->getActivityConfig($fields['mediaType']);
-
         if (empty($fields['mediaId'])) {
             $media = $activityConfig->create($fields);
         }
-
         if (!empty($media)) {
             $fields['mediaId'] = $media['id'];
         }
-
         // 使用content来存储media内容
         if (!empty($fields['media']) && empty($fields['content'])) {
             $fields['content'] = json_encode($fields['media']);
         }
-
         $materials = $this->getMaterialsFromActivity($fields);
-
         $fields['fromUserId'] = $this->getCurrentUser()->getId();
         $fields = $this->filterFields($fields);
         $fields['createdTime'] = time();
-
         $activity = $this->getActivityDao()->create($fields);
-
         if (!empty($materials)) {
             $this->syncActivityMaterials($activity, $materials, 'create');
         }
-
         $listener = $activityConfig->getListener('activity.created');
         if (!empty($listener)) {
             $listener->handle($activity, []);
@@ -269,6 +260,9 @@ class ActivityServiceImpl extends BaseService implements ActivityService
             if (!empty($media)) {
                 $fields['mediaId'] = $media['id'];
             }
+        }
+        if (!empty($fields['media']) && empty($fields['content'])) {
+            $fields['content'] = $fields['media'];
         }
 
         $fields = $this->filterFields($fields);
@@ -742,9 +736,9 @@ class ActivityServiceImpl extends BaseService implements ActivityService
         return false;
     }
 
-    public function findFinishedLivesWithinTwoHours()
+    public function findFinishedLivesWithinOneDay()
     {
-        return $this->getActivityDao()->findFinishedLivesWithinTwoHours();
+        return $this->getActivityDao()->findFinishedLivesWithinOneDay();
     }
 
     public function findActivitiesByMediaIdsAndMediaType($mediaIds, $mediaType)
@@ -786,18 +780,6 @@ class ActivityServiceImpl extends BaseService implements ActivityService
                 return $activity;
             }
         }
-    }
-
-    protected function checkLiveFinished($activity)
-    {
-        $isEsLive = EdusohoLiveClient::isEsLive($activity['ext']['liveProvider']);
-        $endLeftSeconds = time() - $activity['endTime'];
-
-        //ES直播结束时间2小时后就自动结束，第三方直播以直播结束时间为准
-        $thirdLiveFinished = $endLeftSeconds > 0 && !$isEsLive;
-        $esLiveFinished = $isEsLive && $endLeftSeconds > self::LIVE_ENDTIME_DIFF_SECONDS;
-
-        return $thirdLiveFinished || $esLiveFinished;
     }
 
     public function orderAssessmentSubmitNumber($userIds, $answerSceneId)

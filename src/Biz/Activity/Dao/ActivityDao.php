@@ -2,9 +2,9 @@
 
 namespace Biz\Activity\Dao;
 
-use Codeages\Biz\Framework\Dao\GeneralDaoInterface;
+use Codeages\Biz\Framework\Dao\AdvancedDaoInterface;
 
-interface ActivityDao extends GeneralDaoInterface
+interface ActivityDao extends AdvancedDaoInterface
 {
     public function findByCourseId($courseId);
 
@@ -16,7 +16,7 @@ interface ActivityDao extends GeneralDaoInterface
 
     public function findOverlapTimeActivitiesByCourseId($courseId, $newStartTime, $newEndTime, $excludeId = null);
 
-    public function findFinishedLivesWithinTwoHours();
+    public function findFinishedLivesWithinOneDay();
 
     public function getByMediaIdAndMediaTypeAndCopyId($mediaId, $mediaType, $copyId);
 

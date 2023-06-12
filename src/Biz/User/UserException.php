@@ -40,6 +40,7 @@ class UserException extends AbstractException
 
     const PASSWORD_FAILED = 5000117;
 
+    // 抛这个错误app会重新登陆
     const NOTFOUND_TOKEN = 4040117;
 
     const NO_USER_PROVIDER = 4040118;
@@ -85,6 +86,8 @@ class UserException extends AbstractException
     const IDCARD_INVALID = 5000138;
 
     const TRUENAME_INVALID = 5000139;
+
+    const MUST_SELECT_A_STAFFROLE = 4000139;
 
     const LOCK_DENIED = 4030140;
 
@@ -146,6 +149,7 @@ class UserException extends AbstractException
         5000137 => 'exception.user.not_match_auth',
         5000138 => 'exception.user.idcard_invalid',
         5000139 => 'exception.user.truename_invalid',
+        4000139 => 'exception.user.must_select_a_staff_role',
         4030140 => 'exception.user.lock_denied',
         5000141 => 'exception.user.not_match_bind_email',
         4030142 => 'exception.user.lock_self_denied',

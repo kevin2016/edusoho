@@ -216,6 +216,9 @@ class UserDaoImpl extends AdvancedDaoImpl implements UserDao
         if (array_key_exists('hasVerifiedMobile', $conditions)) {
             $builder->andStaticWhere("verifiedMobile != ''");
         }
+        if (!empty($conditions['noVerifiedMobile'])) {
+            $builder->andStaticWhere("verifiedMobile = ''");
+        }
 
         $builder->andStaticWhere("type <> 'system'");
 
@@ -283,6 +286,7 @@ class UserDaoImpl extends AdvancedDaoImpl implements UserDao
                 'promoted = :promoted',
                 'roles LIKE :roles',
                 'roles = :role',
+                'roles != :rolesNot',
                 'UPPER(nickname) LIKE :nickname',
                 'id = :id',
                 'id > :id_GT',
@@ -313,6 +317,7 @@ class UserDaoImpl extends AdvancedDaoImpl implements UserDao
                 'distributorToken = :distributorToken',
                 'destroyed = :destroyed',
                 'showable = :showable',
+                'isStudent != :isStudent',
             ],
         ];
     }

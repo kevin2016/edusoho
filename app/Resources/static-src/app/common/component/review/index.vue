@@ -4,19 +4,20 @@
              style="padding-left: 14px; padding-top: 10px;"></div>
         <div class="reviews">
             <create-review :target-id="targetId" :target-type="targetType" :can-create="canCreate"
-                           :current-user-id="currentUserId"></create-review>
+                           :current-user-id="currentUserId"
+                           :captcha="captcha"></create-review>
             <div class="reviews-item" v-for="review in reviews" :key="review.id" :class="'reviews-item-'+ review.id">
-                <a  target="_blank" :class="'card-'+review.user.id">
+                <a  target="_blank" :class="'card-'+review.user.uuid">
                     <img class="js-user-card reviews-item__img"
                          :src="review.user.avatar.large"
-                         :data-user-id="review.user.id"
-                         :data-card-url="`/user/${review.user.id}/card/show`"
+                         :data-user-id="review.user.uuid"
+                         :data-card-url="`/user/${review.user.uuid}/card/show`"
                          alt=""
                     >
                 </a>
                 <div class="reviews-item__text reviews-text">
                     <div class="reviews-text__nickname">
-                        <a class="link-dark js-user-url" :class="'user-url-'+review.user.id" :data-userid ="review.user.id" target="_blank">{{ review.user.nickname }}</a>
+                        <a class="link-dark js-user-url" :class="'user-url-'+review.user.uuid" :data-userid ="review.user.uuid" target="_blank">{{ review.user.nickname }}</a>
                         <!--                    <span>{{ review.target.title }}</span>-->
                         {{ review.createdTime | createdTime }}
                     </div>
@@ -38,7 +39,7 @@
                         <form>
                             <textarea class="post-content" @blur="validatePostContent"></textarea>
                             <p></p>
-                            <a href="javascript:;" class="btn btn-sm btn-default plm prm pull-right"
+                            <a :ref="`saveBtn-${review.id}`" href="javascript:;" class="btn btn-sm btn-default plm prm pull-right"
                                @click="onSave($event, review.id)">{{ 'form.btn.save'|trans }}</a>
                         </form>
                     </div>
@@ -52,7 +53,7 @@
                                         <img class="avatar-sm js-user-card"
                                              :src="post.user.avatar.large"
                                              :data-user-id="post.user.id"
-                                             :data-card-url="`/user/${post.user.id}/card/show`"
+                                             :data-card-url="`/user/${post.user.uuid}/card/show`"
                                              alt=""
                                         >
                                     </a>
@@ -99,7 +100,7 @@
                         <form class="hidden" :class="'reviews-text__reply-content-form-'+review.id">
                             <textarea class="post-content" @blur="validatePostContent"></textarea>
                             <p></p>
-                            <a href="javascript:;" class="btn btn-sm btn-default plm prm pull-right"
+                            <a :ref="`saveBtn-${review.id}`" href="javascript:;" class="btn btn-sm btn-default plm prm pull-right"
                                @click="onSave($event, review.id)">{{ 'form.btn.save'|trans }}</a>
                         </form>
                     </div>
@@ -120,6 +121,7 @@
     import axios from 'axios';
     import createReview from './src/create-review';
     import Api from 'common/api';
+    import Captcha from 'app/common/captcha';
 
     axios.interceptors.request.use((config) => {
         config.headers = {
@@ -148,6 +150,9 @@
         return error;
     });
 
+    const captcha = new Captcha({ drag: { limitType: "course", bar:'#drag-btn', target: '.js-jigsaw' } });
+    captcha.isShowCaptcha = $(captcha.params.maskClass).length ? 1 : 0
+
     export default {
         name: 'reviews',
         components: {
@@ -163,6 +168,8 @@
                     offset: 0,
                     total: 0
                 },
+                _dragCaptchaToken: '',
+                captcha
             }
         },
         computed: {
@@ -211,6 +218,16 @@
                 default: null
             }
         },
+        created() {
+            const _this = this;
+            captcha.on('success', (data) => {
+                if (data.type === 'review') {
+                    captcha.isShowCaptcha = 0;
+                    _this._dragCaptchaToken = data.token;
+                    _this.$refs[`saveBtn-${captcha.reviewId}`][0].click();
+                }
+            })
+        },
         methods: {
             searchReviews(offset = 0, limit = 5) {
                 if (!this.targetType || !this.targetId) {
@@ -251,7 +268,7 @@
 
                 this.switchDisplay(event);
             },
-            validatePostContent(event) {
+            validatePostContent(event, reviewId) {
                 let $form = $(event.currentTarget).parent('form');
                 if (!$form.find('.post-content').val().trim()) {
                     $form.find('.post-content').addClass('form-control-error');
@@ -265,16 +282,24 @@
                 $form.find('p').removeClass('form-error-message');
                 $form.find('p').empty();
 
+                if (reviewId && $("input[name=enable_anti_brush_captcha]").val() == 1 && captcha.isShowCaptcha == 1){
+                    captcha.setType('review')
+                    captcha.reviewId = reviewId
+                    captcha.showDrag();
+
+                    return false;
+                }
+
                 return true;
             },
             generateReviewPostLi(post) {
                 let html = '<li class="thread-post thread-subpost-' + post.id + ' media">\n' +
                     '  <div class="media-left">\n' +
-                    `<a href="/user/${post.user.id}" target="_blank">
+                    `<a href="/user/${post.user.uuid}" target="_blank">
                         <img class="avatar-sm js-user-card"
                              src="${post.user.avatar.large}"
                              data-user-id="${post.user.id}"
-                             data-card-url="/user/${post.user.id}/card/show"
+                             data-card-url="/user/${post.user.uuid}/card/show"
                              alt=""
                         >
                     </a>` +
@@ -291,7 +316,7 @@
                         Translator.trans('site.delete') + '</a></li></ul></div>';
                 }
 
-                html = html + `      <a class="link-dark" href="/user/${post.user.id}" target="_blank">\n` + post.user.nickname +
+                html = html + `      <a class="link-dark" href="/user/${post.user.uuid}" target="_blank">\n` + post.user.nickname +
                     '      </a>\n' +
                     '      <span class="bullet">•</span>\n' +
                     '      <span class="color-gray">' + Translator.trans('site.twig.extension.smarttime.hardly') + '</span>\n' +
@@ -305,9 +330,6 @@
 
             },
             onSave(event, reviewId) {
-                if (!this.validatePostContent(event)) {
-                    return;
-                }
                 let $targetForm = $(event.currentTarget).parent('form');
 
                 if ($targetForm.siblings('ul').find('.thread-post').length >= 5) {
@@ -317,9 +339,15 @@
                     });
                     return;
                 }
+
+                if (!this.validatePostContent(event, reviewId)) {
+                    return;
+                }
+
                 Api.review.reviewPost({
                     params: {
-                        reviewId: reviewId
+                        reviewId: reviewId,
+                        _dragCaptchaToken: this._dragCaptchaToken
                     },
                     data: {
                         'content': $targetForm.find('.post-content').val().trim()
@@ -339,7 +367,10 @@
                         type: 'success',
                         message: Translator.trans('site.save_success_hint')
                     });
-                });
+                }).finally(() => {
+                    captcha.isShowCaptcha = 1;
+                    captcha.hideDrag();
+                })
 
                 // axios({
                 //     url: "/api/review/" + reviewId + "/post",

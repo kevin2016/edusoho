@@ -1,24 +1,11 @@
 {% import 'admin-v2/macro.html.twig' as admin_macro %}
 <tr id="user-table-tr-{{ user.id }}">
   {% include 'org/parts/table-body-checkbox.html.twig' %}
-  <td>
+  <td style="vertical-align: middle;width: 212px">
     <strong>{{ admin_macro.user_link(user) }}</strong>
     {% if user.locked %}
       <label class="label label-danger">{{'admin.user.manage.fields.forbid_label'|trans}}</label>
     {% endif %}
-
-    <br>
-    <span class="text-muted text-sm">
-      {% for role in user.roles %}
-        {% set userRole = data('Role', {code: role}) %}
-        {% if userRole|default(false) %}
-          {{userRole.name|default('')}}
-        {% else %}
-          {{ dict_text('userRole', role) }}
-        {% endif %}
-        {% if not loop.last %} &nbsp {% endif %}
-      {% endfor %}
-    </span>
   </td>
  {% include 'org/parts/table-body-td.html.twig' with {orgCode: user.orgCode}%}
   <td>
@@ -69,7 +56,7 @@
   </td>
   <td>
     <div class="btn-group">
-      <a href="#modal" data-toggle="modal" data-url="{{ path('admin_v2_user_show', {id:user.id}) }}" data-url="" class="btn btn-default btn-sm">{{ 'admin.user.btn.show_btn'|trans }}</a>
+      <a href="#modal" data-toggle="modal" data-url="{{  path('admin_v2_user_show', {id:user.uuid}) }}" data-url="" class="btn btn-default btn-sm">{{ 'admin.user.btn.show_btn'|trans }}</a>
       {% include 'admin-v2/widget/group-button.html.twig' with {parentCode: 'admin_v2_user_manage', group:'groupButton', user: user} %}
     </div>
   </td>

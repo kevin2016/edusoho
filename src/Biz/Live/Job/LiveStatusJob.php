@@ -17,19 +17,14 @@ class LiveStatusJob extends AbstractJob
         if (!$canExecute) {
             return;
         }
-        if ('closeSecondJob' === $jobType) {
-            $this->getLiveActivityService()->closeLive($liveId, time());
-
-            return;
-        }
         $confirmStatus = $this->getLiveService()->confirmLiveStatus($liveId);
-        $status = $confirmStatus['status'] ?: 'unknown';
+        $status = !empty($confirmStatus['data']) ? $confirmStatus['data']['status'] : 'unknown';
         if ('living' === $status) {
-            $startTime = $confirmStatus['liveStartTime'] ?: time();
+            $startTime = $confirmStatus['liveStartTime'] ?: 0;
             $this->getLiveActivityService()->startLive($liveId, $startTime);
         }
-        if ('finished' === $status) {
-            $closeTime = $confirmStatus['liveEndTime'] ?: time();
+        if ('finished' === $status || (false !== strpos($jobType, 'close') && 'living' !== $status)) {
+            $closeTime = $confirmStatus['liveEndTime'] ?: 0;
             $this->getLiveActivityService()->closeLive($liveId, $closeTime);
         }
     }

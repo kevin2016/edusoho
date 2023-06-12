@@ -10,6 +10,7 @@ use Biz\System\Service\CacheService;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Topxia\Service\Common\ServiceKernel;
+use Biz\Util\EdusohoLiveClient;
 
 class EduCloudServiceImpl extends BaseService implements EduCloudService
 {
@@ -55,6 +56,43 @@ class EduCloudServiceImpl extends BaseService implements EduCloudService
         }
 
         return false;
+    }
+
+    public function uploadCallbackUrl()
+    {
+        try {
+            $site = $this->getSettingService()->get('site', []);
+            if (empty($site['url'])) {
+                return 1;
+            }
+            $client = new EdusohoLiveClient();
+            $client->uploadCallbackUrl(rtrim($site['url'], '/').'/callback/live/handle');
+        } catch (\RuntimeException $e) {
+        }
+
+        return 1;
+    }
+
+    public function getLevel()
+    {
+        $level = $this->getCacheService()->get('site_level');
+        if (empty($level)) {
+            $me = $this->createCloudApi()->get('/me');
+            $level = $me['level'] ?? '';
+            $this->getCacheService()->set('site_level', $level, time() + 7200);
+        }
+
+        return $level;
+    }
+
+    public function isSaaS()
+    {
+        return in_array($this->getLevel(), $this->getSaasLevels());
+    }
+
+    protected function getSaasLevels()
+    {
+        return ['personal', 'basic', 'medium', 'advanced', 'gold', 'es-basic', 'es-standard', 'es-professional', 'es-flagship'];
     }
 
     protected function writeErrorLog($e)

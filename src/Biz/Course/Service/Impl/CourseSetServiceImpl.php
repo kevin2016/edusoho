@@ -55,7 +55,7 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
 
         $fields = [
             'recommended' => 1,
-            'recommendedSeq' => (int) $number,
+            'recommendedSeq' => (int)$number,
             'recommendedTime' => time(),
         ];
 
@@ -106,13 +106,10 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
         if (!$user->isLogin()) {
             $this->createNewException(UserException::UN_LOGIN());
         }
-
         $courseSet = $this->getCourseSetDao()->get($id);
-
         if (empty($courseSet)) {
             $this->createNewException(CourseSetException::NOTFOUND_COURSESET());
         }
-
         if ($courseSet['parentId'] > 0) {
             $classroomCourse = $this->getClassroomService()->getClassroomCourseByCourseSetId($id);
             if (!empty($classroomCourse)) {
@@ -123,7 +120,6 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
                 }
             }
         }
-
         if (!$this->hasCourseSetManageRole($id)) {
             $this->createNewException(CourseSetException::FORBIDDEN_MANAGE());
         }
@@ -408,6 +404,7 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
         }
 
         $courseSet = $this->tryManageCourseSet($id);
+        $oldCourseSet = $courseSet;
 
         $fields = ArrayToolkit::parts(
             $fields,
@@ -437,7 +434,7 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
 
         $courseSet = $this->getCourseSetDao()->update($courseSet['id'], $fields);
 
-        $this->dispatchEvent('course-set.update', new Event($courseSet));
+        $this->dispatchEvent('course-set.update', new Event($courseSet, ['oldCourseSet' => $oldCourseSet]));
 
         $this->getCourseSetGoodsMediator()->onUpdateNormalData($courseSet);
 
@@ -525,6 +522,7 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
             $this->createNewException(CommonException::ERROR_PARAMETER());
         }
         $courseSet = $this->tryManageCourseSet($id);
+        $oldCourseSet = $courseSet;
         $covers = [];
         foreach ($coverArray as $cover) {
             $file = $this->getFileService()->getFile($cover['id']);
@@ -533,7 +531,7 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
 
         $courseSet = $this->getCourseSetDao()->update($courseSet['id'], ['cover' => $covers]);
 
-        $this->dispatchEvent('course-set.update', new Event($courseSet));
+        $this->dispatchEvent('course-set.update', new Event($courseSet, ['oldCourseSet' => $oldCourseSet]));
         $this->getCourseSetGoodsMediator()->onUpdateNormalData($courseSet);
 
         return $courseSet;
@@ -762,7 +760,7 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
     {
         $courseSet = $this->tryManageCourseSet($id);
 
-        if (!(bool) $courseSet['locked']) {
+        if (!(bool)$courseSet['locked']) {
             return $courseSet;
         }
 
@@ -1230,7 +1228,7 @@ class CourseSetServiceImpl extends BaseService implements CourseSetService
         $courseSet['status'] = 'draft';
         $courseSet['title'] = $this->purifyHtml($courseSet['title'], true);
         $coinSetting = $this->getSettingService()->get('coin', []);
-        if (!empty($coinSetting['coin_enabled']) && (bool) $coinSetting['coin_enabled']) {
+        if (!empty($coinSetting['coin_enabled']) && (bool)$coinSetting['coin_enabled']) {
             $courseSet['maxRate'] = 100;
         }
 

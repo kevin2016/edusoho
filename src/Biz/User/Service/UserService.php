@@ -11,6 +11,8 @@ interface UserService
 
     public function updateUser($id, array $fields);
 
+    public function UserBindUpdate($openId, $userId);
+
     public function getUserAndProfile($id);
 
     public function initSystemUsers();
@@ -51,6 +53,8 @@ interface UserService
     public function findUnDestroyedUsersByIds($ids);
 
     public function findUserProfilesByIds(array $ids);
+
+    public function findUpdateUserProfilesByIds(array $ids);
 
     public function searchUsers(array $conditions, array $orderBy, $start, $limit, $columns = []);
 
@@ -216,6 +220,10 @@ interface UserService
      */
     public function makeToken($type, $userId = null, $expiredTime = null, $data = null);
 
+    public function getUserToken($token);
+
+    public function refreshToken($token, $refreshToken, $expiredTime = null);
+
     /**
      * @deprecated move to TokenService
      */
@@ -248,11 +256,11 @@ interface UserService
     public function unlockUser($id);
 
     /**
-     * @param $userId
+     * @param $id
      * @param $nickname
      *
      * @return mixed
-     * @Log(module="user",action="delete_user",funcName="getUser",param="userId")
+     * @Log(module="user",action="delete_user",funcName="getUser",param="id")
      */
     public function deleteUser($id);
 
@@ -283,6 +291,8 @@ interface UserService
      * 绑定第三方登录的帐号到系统中的用户帐号.
      */
     public function bindUser($type, $fromId, $toId, $token);
+
+    public function syncBindUser($fromId);
 
     public function getUserBindByTypeAndFromId($type, $fromId);
 

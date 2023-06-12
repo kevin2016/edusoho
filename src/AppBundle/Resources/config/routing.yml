@@ -88,6 +88,12 @@ oauth2_login_app:
     path: /oauth2/login/app
     defaults:
         _controller: 'AppBundle:OAuth2/Login:app'
+oauth2_login_try_bind_account:
+    path: /oauth2/login/try/bind_account
+    defaults:
+        _controller: 'AppBundle:OAuth2/Login:tryBindAccount'
+    methods:
+        - POST
 oauth2_login_bind_account:
     path: /oauth2/login/bind_account
     defaults:
@@ -1939,10 +1945,18 @@ task_live_entry:
     defaults:
         _controller: 'AppBundle:Activity/Live:liveEntry'
     h5: true
+es_live_h5_entry:
+    path: '/es_live/h5_entry/{token}'
+    defaults:
+        _controller: 'AppBundle:Activity/Live:esLiveH5Entry'
 custom_live_activity_replay_entry:
     path: '/course/{courseId}/activity/{activityId}/replay/{replayId}/custom_entry'
     defaults:
         _controller: 'AppBundle:Activity/Live:customReplayEntry'
+es_live_replay_h5_entry:
+    path: '/es_live/replay/h5_entry/{token}'
+    defaults:
+        _controller: 'AppBundle:Activity/Live:esLiveReplayH5Entry'
 #课程回放课程id和activityId改动
 course_live_activity_replay_entry:
     path: '/course/{courseId}/activity/{activityId}/replay/{replayId}/course_entry'
@@ -2272,6 +2286,12 @@ course_set_manage_course_delete:
         _controller: 'AppBundle:Course/CourseManage:delete'
     methods:
         - POST
+course_set_manage_course_check_mall_goods:
+  path: '/course_set/course/{courseId}/check_mall_goods'
+  defaults:
+    _controller: 'AppBundle:Course/CourseManage:checkEsProductCanDelete'
+  methods:
+    - POST
 course_set_manage_course_publish:
     path: '/course_set/{courseSetId}/course/{courseId}/publish'
     defaults:
@@ -3178,6 +3198,10 @@ material_lib_file_player:
     path: '/material/lib/{fileId}/player'
     defaults:
         _controller: 'AppBundle:MaterialLib/MaterialLib:player'
+material_lib_item_attachment_player:
+  path: '/material/lib/{fileId}/itemAttachmentPlayer'
+  defaults:
+    _controller: 'AppBundle:MaterialLib/MaterialLib:itemAttachmentPlayer'
 material_reconvert:
     path: '/material/lib/{globalId}/reconvert'
     defaults:
@@ -3810,14 +3834,7 @@ category_choices:
     defaults:
         _controller: 'AppBundle:Vue/Common:getCategoryChoices'
         type: course
-get_current_user:
-    path: /current/user
-    defaults:
-        _controller: 'AppBundle:Vue/Common:currentUser'
-get_data_tag:
-    path: '/data/tag/{name}'
-    defaults:
-        _controller: 'AppBundle:Vue/Common:getDataTag'
+
 render_org:
     path: /render/org
     defaults:
@@ -4089,3 +4106,4 @@ classroom_live_task_statistic_export:
     path: /classroom/{classroomId}/live_statistic/export
     defaults:
         _controller: 'AppBundle:LiveStatisticExport:classroomLiveStatisticExport'
+

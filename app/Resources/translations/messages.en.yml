@@ -30,6 +30,7 @@ site.data.score: Score
 site.data.count: Count
 site.copy: Copy
 site.delete: Delete
+site.deleting: Deleting
 site.datagrid.empty: 'No data'
 site.datagrid.filter.all_records: 'All'
 site.datagrid.filter.last_one_week: 'Last 7 days'
@@ -145,7 +146,7 @@ site.twig.extension.time_interval.second: '%diff% second'
 site.twig.extension.time_interval.minute: '%diff% minute'
 site.twig.extension.time_interval.hour_minute: '%diff_hour% hour %diff_minute% minute'
 site.twig.extension.time_interval.minute_second: '%diff_minute% minute %diff_second% second'
-site.media.import.input_placeholder: Open online course from Youku, Tencent, Netease, Bilibili, Iqiyi is now suported
+site.media.import.input_placeholder: Open online course from Youku, Tencent, Netease, Bilibili is now suported
 site.user_password.error_tips: Bad credentials
 
 site.mobile_bind.ignore: skip
@@ -217,6 +218,8 @@ paginator.firstPage: 'First'
 paginator.endPage: 'End'
 paginator.nextPage: 'Next'
 paginator.lastPage: 'Last'
+paginator.jump: Jump
+paginator.page: Page
 user: User
 user.not_exist: 'User is not exist'
 user.fields.login_password: 'Login password'
@@ -528,8 +531,8 @@ order.adjust_price_modal.hint: 'Please fill the discount in inputbox'
 
 order.confirm.account_cash: 'Account balance:'
 order.confirm.safety_tips: 'To ensure the safty of your account, please'
-order.confirm.setup_pay_password_tips: 'To ensure the safty of your account, please <a class="color-warning underline" href="javascript:;" data-toggle="modal" data-target="#modal" data-url="%setupUrl%" style="text-decoration:underline;">set your payment password</a>'
-order.confirm.setup_login_password_tips: 'To ensure the safty of your account, please <a class="color-warning underline" href="javascript:;" data-toggle="modal" data-target="#modal" data-url="%setupUrl%" style="text-decoration:underline;">set your login password</a>'
+order.confirm.setup_pay_password_tips: 'To ensure the safty of your account, please <a class="underline color-warning" href="javascript:;" data-toggle="modal" data-target="#modal" data-url="%setupUrl%" style="text-decoration:underline;">set your payment password</a>'
+order.confirm.setup_login_password_tips: 'To ensure the safty of your account, please <a class="underline color-warning" href="javascript:;" data-toggle="modal" data-target="#modal" data-url="%setupUrl%" style="text-decoration:underline;">set your login password</a>'
 order.confirm.forget_password_btn: 'Forget pay password？'
 order.confirm.forget_password_tips: 'Payment password '
 order.confirm.input_pay_password_tips: 'Please input your payment password'
@@ -973,6 +976,7 @@ course.members_manage.official_student.search: Search
 course.members_manage.official_student.batch_upload_deadline: Batch modification validity period
 course.members_manage.official_student.batch_remove: Batch remove
 course.members_manage.official_student.input_placeholder: 'Username/Email/Phone'
+course.members_manage.official_student.seq: Seq
 course.members_manage.official_student.progress: 'Learn progress'
 course.members_manage.official_student.status: 'Learn status'
 course.members_manage.official_student.operation: Action
@@ -1813,7 +1817,7 @@ course.plan_task.activity_manage.exercise.question_type_range: 'Question scope'
 course.plan_task.activity_manage.exercise.question_type_range_tips: 'Tips: practice for the random questions, just fill in the number of questions and select the type of questions can be.'
 course.plan_task.activity_manage.exercise.submit_btn: Submit
 course.plan_task.activity_manage.exercise.questionNum: >
-  <span class="color-gray text-sm"><span role="questionNum" type="%questionType%" >%questionNum%</span></span>
+  <span class="text-sm color-gray"><span role="questionNum" type="%questionType%" >%questionNum%</span></span>
 course.plan_task.activity_manage.exercise.start_btn: Start
 course.plan_task.activity_manage.exercise.info: Introduction
 course.plan_task.activity_manage.exercise.info_tips: 'This assignment is random generate <span class="color-success">%itemCount% questions</span>'
@@ -1900,6 +1904,7 @@ course.plan_task.activity_manage.testpaper.will_begin_tips: 'The exam does not s
 course.plan_task.activity_manage.testpaper.total_question: 'A total of <span class = "color-primary">%itemCount% questions</ span>, total <span class = "color-primary">%score% points</span>.'
 course.plan_task.activity_manage.testpaper.pass_score: "pass score is <span class=\"color-primary\">%finishScore% points</span>.\n"
 course.plan_task.activity_manage.testpaper.answer: 'Please answer within <span class = "color-primary">%limitedTime% minutes</span>.'
+course.plan_task.activity_manage.testpaper.limit_tips: '<span class="color-warning">Reminder: Once the test starts, the test will be handed in automatically after the countdown is over.</span>'
 course.plan_task.activity_manage.testpaper.once_trance: 'Only <span class = "color-danger"> once </ span> test opportunities.'
 course.plan_task.activity_manage.testpaper.start_exam: 'Start'
 course.plan_task.activity_manage.testpaper.close_tips: 'The test is closed, please contact the teacher!'
@@ -2651,6 +2656,7 @@ user.oauth.binding_web_user: 'in binding'
 user.oauth.bind_account_and_go_continue: 'bind and continue'
 user.oauth.bind_other_account: 'bind other account?'
 user.oauth.bind_existed_account: 'bind existing account?'
+user.oauth.bind_error.bind_by_other: 'The account has been bound'
 user.oauth.register.nickname_placeholder: 'not more than 18 english words or 9 chinese words'
 user.oauth.register.password__placeholder: '5-20 words, number or symbol'
 user.oauth.register_account_by_ways: 'Use %accountType% to register'
@@ -4507,6 +4513,7 @@ admin.user.online.visitor: Visitor
 admin.user.online.registed_user: Registered user
 admin.user.online.all_visitors: All visitors
 admin.user.online.online_user_count: A total of %count% eligible online users (within 15 minutes)
+admin.user.online.statistical_range: The scope of statistics includes trainees and employees
 
 admin.comment_manage.title: 'Comments'
 admin.comment_manage.monitor: 'Comment monitor'
@@ -4811,7 +4818,7 @@ admin.homepage.status_bar.mobile_app_status.open: Enabled
 admin.homepage.status_bar.mobile_app_status.not_open: 'Not Enabled'
 admin.homepage.todays_data_title: 'Today''s Data Statistics'
 admin.homepage.todays_data.tooltips: >
-  <div class="popover-content hidden">
+  <div class="hidden popover-content">
     <div class="popover-item">
       <div class="title">Login User</div>
       <div class="content">Users who have login and been active in last 15 mins.</div>
@@ -5950,7 +5957,7 @@ admin.edu_cloud.edu_video.finger_print_time: Second
 admin.edu_cloud.edu_video.finger_print_opacity_label: 'Cloud video fingerprint opacity'
 admin.edu_cloud.edu_video.finger_print_opacity_tips: 'The recommended opacity is between 0 and 1 seconds,The smaller the number, the more transparent'
 admin.edu_cloud.edu_video.enable_hls_encryption_plus: 'Cloud video security enhancements'
-admin.edu_cloud.edu_video.enable_hls_encryption_plus_tips: 'After turned on, cloud video anti-theft effect to further enhance, but the video will not be able to play in the H5 browser, the system will guide the user to use App view. Android is only allowed to view in the built-in browser of wechat app'
+admin.edu_cloud.edu_video.enable_hls_encryption_plus_tips: 'After turned on, cloud video anti-theft effect to further enhance, but the video will not be able to play in the mobile browser except the built-in browsers of Dingtalk/Feishu/Wechat/WorkWechat, the system will guide the user to use App view.'
 admin.edu_cloud.edu_video.enable_hls_encryption_plus_upgrade_tips: 'After turned on, cloud video anti-theft effect to further enhance, but the video will not be able to play in the H5 browser except Wechat, the system will guide the user to use Wechat or App view.'
 admin.edu_cloud.edu_video.buy_flow_tips: 'Open traffic annual package, video traffic more cost-effective. <a class="" href="%bugUrl%" target="_blank"> What is a traffic package? </a>'
 admin.edu_cloud.edu_video.start_buy: "Contact official immediately opened: <span class = \"text-primary\"> 4008041114 </ span> \n"
@@ -6030,6 +6037,11 @@ admin.edu_cloud.edu_live.renew_btn: Renew
 admin.edu_cloud.edu_live.expiry_date: 'Expiry Date'
 admin.edu_cloud.edu_live.overdue_tips: 'Your cloud live service has expired, please renew as soon as possible, so as not to affect the normal use'
 admin.edu_cloud.edu_live.renew_tips: 'Your cloud live service will expire in %remaining% days, please renew as soon as possible'
+admin.edu_cloud.edu_live.security_setting: 'Security Settings'
+admin.edu_cloud.edu_live.watermark: 'Live Watermark'
+admin.edu_cloud.edu_live.watermark_tips: 'After opening, the watermark information will be displayed in a fixed position in the live broadcast room, supporting PC/APP/H5'
+admin.edu_cloud.edu_live.watermark_config: 'Watermark Information'
+admin.edu_cloud.edu_live.watermark_config_tips: 'For the best user experience, it is recommended to combine at most 2 item of information to display. Note: If the mobile phone number of user is not available, it will display -'
 'admin,edu_cloud.edu_sms.sms_balance_count': 'Number of SMS <span class="h3 text-primary plm prs">%sms_balance_count%</span>'
 admin.edu_cloud.edu_sms.sms_rest_tips: 'Your message balance remaining %sms_rest%, please renew as soon as possible, so as not to affect the normal use.'
 admin.edu_cloud.edu_sms.identity_check: Authentication
@@ -6211,7 +6223,7 @@ admin.edu_cloud.edu_email.edit_btn: Edit
 admin.edu_cloud.edu_email.open_tips: 'Enjoy quality cloud email services'
 admin.edu_cloud.edu_email.sign_tips: '3-8 Word signature'
 admin.edu_cloud.edu_email.sms_tips: 'Provide quality email channels to ensure stable and reliable email delivery; no complex configuration,no amount limit.'
-admin.edu_cloud.edu_email.connect_tips: '<span class="text-danger text-sm" > Sorry, you have not access to education yet, and cannot use the mail service! </span><p><a href="http://open.edusoho.com/educloud" target="_blank"> Immediate access </a></p>'
+admin.edu_cloud.edu_email.connect_tips: '<span class="text-sm text-danger" > Sorry, you have not access to education yet, and cannot use the mail service! </span><p><a href="http://open.edusoho.com/educloud" target="_blank"> Immediate access </a></p>'
 admin.edu_cloud.edu_search.search_rank: 'Search ranking'
 admin.edu_cloud.edu_search.hot_words_rank: 'Hot words list'
 admin.edu_cloud.edu_search.hot_courses_rank: 'Search courses rankings'
@@ -6544,6 +6556,7 @@ admin.setting_course.authority_and_copyright: 'Permissions and copyright'
 admin.setting_course.allow_teacher_manage_course_marketing: 'Allows teachers to manage course marketing'
 admin.setting_course.allow_teacher_search_course_order: 'Allowing teachers to check course order'
 admin.setting_course.allow_teacher_add_or_remove: 'Allow teachers to add / Remove student'
+admin.setting_course.allow_teacher_course_material_download: 'Allow teachers to download course materials'
 admin.setting_course.allow_teacher_export_material: 'Allow teachers download student information'
 admin.setting_course.allow_user_download_audio: 'Allow student download audio and video'
 admin.setting_course.allow_user_download_audio.help_block: 'If turn on this setting, student can download in the resource panel.'
@@ -6658,6 +6671,7 @@ admin.developer_setting.s2b2c_supplier_api: S2B2C Supplier API
 admin.developer_setting.content_title: 'Developer settings'
 admin.developer_setting.debug_label: Debugging
 admin.developer_setting.app_center_api_address: 'Application Center API address'
+admin.developer_setting.es_live_api_server: ES Live API
 admin.developer_xapi_address: XAPI address
 admin.developer_face_address: AI Face API address
 admin.developer_push_address: Push API address
@@ -9198,6 +9212,7 @@ exception.user.message_forbidden: 'Does''t support sending message to this user.
 exception.user.discuz_user_reset_password: Please retrieve your password through the forum！
 exception.user.not_found: 'Cannot find this user!'
 exception.form.expire: 'Timeout, please commit again!'
+exception.form..drag.expire: 'The verification code has expired, please refresh the page and resubmit！'
 exception.user.register_error: 'User data is wrong, and failed to register!'
 exception.user.mobile_registered: 'This number has been used.'
 exception.user.register_limit: The number of registrations has reached the maximum limit!
@@ -10045,6 +10060,9 @@ admin_v2.homepage.today_register_user: Number of users registered today
 admin_v2.homepage.today_new_paid_order: Orders paid today
 admin_v2.homepage.today_new_order: Number of orders added today
 
+admin_v2.homepage.welcome_desc: Welcome to EduSoho Educational Products
+admin_v2.homepage.wechat_code: Join the open source product use learning exchange group
+
 # 新后台首页通知
 admin_v2.domain_error_hint: Current domain name does not match with the authorized domain name.to avoid affecting the normal use of cloud sms,please come【System】-【General Manage】-【Online School Information】-【Site Domain】
 admin_v2.homepage.setting_domain_btn: Set Up Now
@@ -10086,6 +10104,21 @@ admin_v2.homepage.school_info.level.none: Open source
 admin_v2.homepage.school_info.level.saas: SaaS
 admin_v2.homepage.school_info.level.license: License
 admin_v2.homepage.school_info.level.custom: Custom
+
+admin_v2.homepage.school_info.enter.label: PC online school
+admin_v2.homepage.school_info.enter.content: Enter PC online school
+admin_v2.homepage.school_info.enter.marketing: Online school mall
+admin_v2.homepage.school_info.enter.start_marketing: Open the mall
+admin_v2.homepage.school_info.enter.start_marketing_tooltip: After opening, you can share the mall
+admin_v2.homepage.school_info.enter.copy_link_tips: Support copy link and download QR code sharing mall
+admin_v2.homepage.school_info.enter.link_share: link sharing
+admin_v2.homepage.school_info.enter.copy_btn: copy Link
+admin_v2.homepage.school_info.enter.link_tips1: link support open in
+admin_v2.homepage.school_info.enter.link_tips2: ''
+admin_v2.homepage.school_info.enter.qrcode_share: QR code sharing
+admin_v2.homepage.school_info.enter.download_qrcode: Download QR code
+admin_v2.homepage.school_info.enter.qrcode_share_tips: QR code support sharing to
+admin_v2.homepage.school_info.enter.copy_success: Link copied successfully
 
 # 新后台
 admin_v2.edu_cloud_not_access: Edu cloud not accessable
@@ -10163,6 +10196,8 @@ admin_v2.user.destroy_account_record.show: Show
 admin_v2.user.destroy_account_record.empty: Empty
 admin_v2.user.destroy_account_record.detail: Detail
 admin_v2.user.destroy_account_record.rejectedReson: RejectedReson
+admin_v2.user.destroy_account_record.origin_mobile: Original Mobile
+admin_v2.user.destroy_account_record.origin_email: Original Email
 admin_v2.destroy_account.destroyed_account.number: Cancellation ID
 admin_v2.destroy_account.destroyed_account.nickname: Nickname
 admin_v2.destroy_account.destroyed_account.destroy_time: Destroy Time
@@ -10764,6 +10799,11 @@ admin_v2.system.user_content_control.content_audit_setting.audit_after.tips: Tha
 admin_v2.system.user_content_control.content_audit_setting.auto_audit.label: Content that misses sensitive words is approved by the system by default
 admin_v2.system.user_content_control.content_audit_setting.auto_audit.allow: Allowed
 admin_v2.system.user_content_control.content_audit_setting.auto_audit.not_allow: Not Allowed
+admin_v2.system.user_content_control.content_anti_brush_setting.enable_anti_brush_captcha.label: Content anti-swipe verification settings
+admin_v2.system.user_content_control.content_anti_brush_setting.enable_anti_brush_captcha.open: Open
+admin_v2.system.user_content_control.content_anti_brush_setting.enable_anti_brush_captcha.close: Close
+admin_v2.system.user_content_control.content_anti_brush_setting.enable_anti_brush_captcha.open.tips: After opening, information comment/reply, course evaluation/reply, class evaluation/reply, question evaluation/reply, group topic posting/reply will require a verification code
+admin_v2.system.user_content_control.content_anti_brush_setting.enable_anti_brush_captcha.close.tips: No Captcha required after closing
 
 admin_v2.operation.user_content_audit_form.sensitive_keywords.placeholder: Sensitive Keywords
 admin_v2.operation.user_content_audit_form.author.placeholder: Author
@@ -10856,6 +10896,7 @@ exception.multi_class.multi_teacher_cannot_be_assistant: The Multi class teacher
 exception.multi_class.forbidden_delete_course: The course can not delete
 exception.multi_class.forbidden_close_course: The course can not close
 exception.multi_class.group_not_found: The group not found
+exception.multi_class.create_group_failed: Create group failed
 
 site.login.change_to_pwd: Change to account login
 site.login.change_to_sms: Change to sms login

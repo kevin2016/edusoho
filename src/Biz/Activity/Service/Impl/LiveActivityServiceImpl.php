@@ -14,7 +14,7 @@ use Biz\BaseService;
 use Biz\Course\Service\CourseService;
 use Biz\Course\Service\LiveReplayService;
 use Biz\File\Service\UploadFileService;
-use Biz\MultiClass\Service\MultiClassGroupService;
+use Biz\Live\Service\LiveService;
 use Biz\System\Service\LogService;
 use Biz\System\Service\SettingService;
 use Biz\Task\Dao\TaskDao;
@@ -95,7 +95,7 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
                 $error = '帐号已过期' == $live['error'] ? '直播服务已过期' : $live['error'];
                 throw $this->createServiceException($error, 500);
             }
-            $this->dispatchEvent('live.activity.create', new Event($live['id'], ['activity' => $activity]));
+            $this->dispatchEvent('live.activity.create', new Event($live['id'], ['activity' => $activity, 'live' => $live]));
         }
 
         if (!empty($activity['roomType']) && !$this->isRoomType($activity['roomType'])) {
@@ -113,6 +113,9 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
             'anchorId' => $this->getCurrentUser()->getId(),
             'coursewareIds' => empty($live['coursewareIds']) ? [] : $live['coursewareIds'],
         ];
+        if (EdusohoLiveClient::SELF_ES_LIVE_PROVIDER == $live['provider']) {
+            $liveActivity['roomId'] = $live['roomId'] ?? 0;
+        }
 
         return $this->getLiveActivityDao()->create($liveActivity);
     }
@@ -210,6 +213,9 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
         if (empty($liveActivity)) {
             return;
         }
+        if(empty($startTime)) {
+            $startTime = $liveActivity['liveStartTime'];
+        }
         $activities = $this->getActivityDao()->findActivitiesByMediaIdsAndMediaType([$liveActivity['id']], 'live');
         $update = ['progressStatus' => EdusohoLiveClient::LIVE_STATUS_LIVING, 'liveStartTime' => $startTime];
         foreach ($activities as $activity) {
@@ -231,8 +237,11 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
     public function closeLive($liveId, $closeTime)
     {
         $liveActivity = $this->getLiveActivityDao()->getByLiveId($liveId);
-        if (empty($liveActivity) || (!empty($liveActivity['startTime']) && time() < $liveActivity['startTime']) || EdusohoLiveClient::LIVE_STATUS_LIVING != $liveActivity['progressStatus']) {
+        if (empty($liveActivity) || (!empty($liveActivity['liveStartTime']) && time() < $liveActivity['liveStartTime']) || EdusohoLiveClient::LIVE_STATUS_CLOSED == $liveActivity['progressStatus']) {
             return;
+        }
+        if(empty($closeTime)) {
+            $closeTime = $liveActivity['liveEndTime'];
         }
         $activities = $this->getActivityDao()->findActivitiesByMediaIdsAndMediaType([$liveActivity['id']], 'live');
         $this->getLiveActivityDao()->update($liveActivity['id'], ['progressStatus' => EdusohoLiveClient::LIVE_STATUS_CLOSED, 'liveEndTime' => $closeTime]);
@@ -385,7 +394,9 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
      */
     public function createLiveroom($activity)
     {
-        $speaker = $this->getUserService()->getUser($activity['fromUserId']);
+        $course = $this->getCourseService()->getCourse($activity['fromCourseId']);
+        $speakerId = empty($course['teacherIds']) ? $activity['fromUserId'] : $course['teacherIds'][0];
+        $speaker = $this->getUserService()->getUser($speakerId);
         if (empty($speaker)) {
             $this->createNewException(UserException::NOTFOUND_USER());
         }
@@ -393,8 +404,6 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
         if (!empty($activity['roomType']) && !$this->isRoomType($activity['roomType'])) {
             $this->createNewException(LiveActivityException::ROOMTYPE_INVALID());
         }
-
-        $speaker = $speaker['nickname'];
 
         $liveLogo = $this->getSettingService()->get('course');
         $liveLogoUrl = '';
@@ -408,7 +417,7 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
         $liveData = [
             'summary' => $remark,
             'title' => $activity['title'],
-            'speaker' => $speaker,
+            'speaker' => $speaker['nickname'],
             'startTime' => $activity['startTime'].'',
             'endTime' => ($activity['startTime'] + $activity['length'] * 60).'',
             'authUrl' => $baseUrl.'/live/auth',
@@ -421,6 +430,8 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
             $liveData['roomType'] = EdusohoLiveClient::LIVE_ROOM_LARGE;
             $liveData['pseudoVideoUrl'] = $this->getPseudoLiveVideoUrl($activity);
         }
+        $liveAccount = $this->getEdusohoLiveClient()->getLiveAccount();
+        $liveData['teacherId'] = $this->getLiveService()->getLiveProviderTeacherId($speakerId, $liveAccount['provider']);
 
         $live = $this->getEdusohoLiveClient()->createLive($liveData);
 
@@ -430,10 +441,6 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
         // 给直播间（自研）添加课件
         if (isset($live['provider']) && EdusohoLiveClient::SELF_ES_LIVE_PROVIDER == $live['provider'] && $activity['fileIds']) {
             $live['coursewareIds'] = $this->createLiveroomCoursewares($live['id'], $activity['fileIds']);
-        }
-
-        if (isset($live['provider']) && EdusohoLiveClient::SELF_ES_LIVE_PROVIDER == $live['provider']) {
-            $this->createLiveGroup($live, $activity['fromCourseId']);
         }
 
         return $live;
@@ -474,32 +481,6 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
         }
 
         return 'http:';
-    }
-
-    public function createLiveGroup($live, $courseId)
-    {
-        $groups = $this->getMultiClassGroupService()->findGroupsByCourseId($courseId);
-        if (empty($groups)) {
-            return;
-        }
-
-        $liveGroups = $this->getEdusohoLiveClient()->batchCreateLiveGroups([
-            'liveId' => $live['id'],
-            'groupNames' => ArrayToolkit::column($groups, 'name'),
-        ]);
-
-        if (!empty($liveGroups) && !empty(current($liveGroups)['code'])) {
-            $createGroups = [];
-            foreach ($groups as $key => $group) {
-                $createGroups[] = [
-                    'group_id' => $group['id'],
-                    'live_id' => $live['id'],
-                    'live_code' => $liveGroups[$key]['code'],
-                ];
-            }
-
-            $this->getMultiClassGroupService()->batchCreateLiveGroups($createGroups);
-        }
     }
 
     /**
@@ -573,11 +554,6 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
         return $this->createService('File:UploadFileService');
     }
 
-    protected function getTokenService()
-    {
-        return $this->createService('User:TokenService');
-    }
-
     /**
      * @return LogService
      */
@@ -595,24 +571,19 @@ class LiveActivityServiceImpl extends BaseService implements LiveActivityService
     }
 
     /**
-     * @return MultiClassGroupService
-     */
-    protected function getMultiClassGroupService()
-    {
-        return $this->createService('MultiClass:MultiClassGroupService');
-    }
-
-    protected function getSchedulerService()
-    {
-        return $this->createService('Scheduler:SchedulerService');
-    }
-
-    /**
      * @return LiveReplayService
      */
     protected function getLiveReplayService()
     {
         return $this->createService('Course:LiveReplayService');
+    }
+
+    /**
+     * @return LiveService
+     */
+    protected function getLiveService()
+    {
+        return $this->createService('Live:LiveService');
     }
 
     /**

@@ -28,6 +28,8 @@ class EdusohoLiveClient
 
     const LIVE_REPLAY_STATUS_ERROR = 'error';
 
+    const LIVE_PROVIDER_QUANSHI = 'quanshi';
+
     private $cloudApi;
 
     /**
@@ -220,6 +222,11 @@ class EdusohoLiveClient
         return $this->createCloudApi('root')->get("/liveCloud/room/{$cloudLiveId}/info");
     }
 
+    public function getEsLiveInfos($liveIds)
+    {
+        return $this->createCloudApi('root')->get("/liveCloud/room/infos?ids=".implode(",", $liveIds));
+    }
+
     public function updatePseudoLiveVideo($liveId, $videoUrl)
     {
         return $this->createCloudApi('root')->post('/liveCloud/pseudoVideo/set', [
@@ -286,6 +293,26 @@ class EdusohoLiveClient
     public function downloadReplayForSelfLive($liveId, $userId)
     {
         return $this->createCloudApi('root')->get("/liveCloud/room/{$liveId}/replay/download", ['userId' => $userId]);
+    }
+
+    /**
+     * @param array $args
+     *
+     * @return mixed|string[]
+     */
+    public function createLiveTeacher(array $args)
+    {
+        return $this->createCloudApi('root')->post('/lives/teachers', $args);
+    }
+
+    public function createLiveTicket($roomId, array $args)
+    {
+        return $this->createCloudApi('root')->post("/liverooms/{$roomId}/tickets", $args);
+    }
+
+    public function getLiveTicket($roomId, $ticketNo)
+    {
+        return $this->createCloudApi('root')->get("/liverooms/{$roomId}/tickets/{$ticketNo}");
     }
 
     protected function createCloudApi($server)

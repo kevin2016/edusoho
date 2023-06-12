@@ -20,7 +20,7 @@
     <input type="hidden" name="task-id" value="{{ task.id }}">
     <input type="hidden" name="task-result-status" value="{{ taskResult.status }}">
     <input type="hidden" name="mode" value="{% if preview %}preview{% else %}learn{% endif %}">
-    <input type="hidden" name="plugins_url" value="{{ path('course_task_show_plugins', {courseId: task.courseId, taskId: task.id}) }}">
+    <input type="hidden" name="plugins_url" value="{{ path('course_task_show_plugins', {courseId: task.courseId, taskId: task.id, preview: preview}) }}">
   </div>
 
   <div class="task-dashboard-page js-task-dashboard-page">
@@ -51,6 +51,7 @@
             data-user-id="{{ taskResult.userId|default(0) }}"
             data-file-id="{{ media.id|default(0) }}"
             data-url="{{ path('course_task_activity_show',{courseId:task.courseId, id:task.id, preview:app.request.get('preview') }) }}"
+                  data-video-header-length="{{ videoHeaderLength|default(0) }}"
             src="{{ path('course_task_activity_show',{courseId:task.courseId, id:task.id, preview:app.request.get('preview'), blank:true }) }}"
             style="width:100%;height:100%;border:0px"
             allowfullscreen webkitallowfullscreen>

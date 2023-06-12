@@ -40,7 +40,6 @@ class LessonServiceImpl extends BaseService implements LessonService
         if (!ArrayToolkit::requireds($fields, ['title', 'fromCourseId'])) {
             $this->createNewException(CommonException::ERROR_PARAMETER_MISSING());
         }
-
         $this->beginTransaction();
         try {
             $lesson = [
@@ -50,14 +49,11 @@ class LessonServiceImpl extends BaseService implements LessonService
                 'status' => 'created',
             ];
             $lesson = $this->getCourseChapterDao()->create($lesson);
-
             $taskFields = $this->parseTaskFields($fields);
             $taskFields['categoryId'] = $lesson['id'];
             $taskFields['isLesson'] = true;
             $this->dispatchEvent('course.lesson.create', new Event($lesson));
-
             $task = $this->getTaskService()->createTask($taskFields);
-
             $this->commit();
         } catch (\Exception $exception) {
             $this->rollback();
@@ -84,25 +80,24 @@ class LessonServiceImpl extends BaseService implements LessonService
         return $lesson;
     }
 
-    public function publishLesson($courseId, $lessonId, $updateLessonNum = true)
+    public function publishLesson($courseId, $lessonId, $updateLessonNum = true, $isBatch = false)
     {
         try {
             $this->beginTransaction();
-
             $this->getCourseService()->tryManageCourse($courseId);
             $chapter = $this->getCourseChapterDao()->get($lessonId);
             if (empty($chapter) || $chapter['courseId'] != $courseId || 'lesson' != $chapter['type']) {
                 $this->createNewException(CommonException::ERROR_PARAMETER());
             }
-
             $lesson = $this->getCourseChapterDao()->update($lessonId, ['status' => 'published']);
             $this->publishTasks([$lessonId]);
-
             $this->dispatchEvent('course.lesson.publish', new Event($lesson));
             $this->getLogService()->info('course', 'publish_lesson', '发布课时', $lesson);
-
             if ($updateLessonNum) {
                 $this->updateLessonNumbers($courseId);
+            }
+            if (!$isBatch) {
+                $this->dispatchEvent('course.lesson.update_status', new Event($lesson));
             }
 
             $this->commit();
@@ -125,16 +120,17 @@ class LessonServiceImpl extends BaseService implements LessonService
                 if ('published' === $lesson['status']) {
                     unset($lessons[$key]);
                 } else {
-                    $this->publishLesson($courseId, $lesson['id']);
+                    $this->publishLesson($courseId, $lesson['id'], true, true);
                 }
             } elseif ('unpublished' === $updateStatus) {
                 if (in_array($lesson['status'], ['created', 'unpublished'])) {
                     unset($lessons[$key]);
                 } else {
-                    $this->unpublishLesson($courseId, $lesson['id']);
+                    $this->unpublishLesson($courseId, $lesson['id'], true);
                 }
             }
         }
+        $this->dispatchEvent('course.lesson.batch_update_status', new Event($lessons, ['courseId' => $courseId, 'status' => $updateStatus]));
 
         return $lessons;
     }
@@ -148,13 +144,14 @@ class LessonServiceImpl extends BaseService implements LessonService
         }
 
         foreach ($chapters as $chapter) {
-            $this->publishLesson($courseId, $chapter['id'], false);
+            $this->publishLesson($courseId, $chapter['id'], false, true);
         }
+        $this->dispatchEvent('course.lesson.batch_update_status', new Event($chapters, ['courseId' => $courseId, 'status' => 'published']));
 
         $this->updateLessonNumbers($courseId);
     }
 
-    public function unpublishLesson($courseId, $lessonId)
+    public function unpublishLesson($courseId, $lessonId, $isBatch = false)
     {
         try {
             $this->beginTransaction();
@@ -173,6 +170,9 @@ class LessonServiceImpl extends BaseService implements LessonService
             $this->getLogService()->info('course', 'unpublish_lesson', '关闭课时', $lesson);
 
             $this->updateLessonNumbers($courseId);
+            if (!$isBatch) {
+                $this->dispatchEvent('course.lesson.update_status', new Event($lesson));
+            }
 
             $this->commit();
         } catch (\Exception $e) {
@@ -233,6 +233,7 @@ class LessonServiceImpl extends BaseService implements LessonService
                 $this->createNewException(CommonException::ERROR_PARAMETER());
             }
         }
+        $this->dispatchEvent('course.lesson.batch_delete', new Event($lessons, ['courseId' => $courseId]));
 
         return $lessons;
     }
